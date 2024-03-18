@@ -1,12 +1,13 @@
 import glob
 import subprocess
 from pathlib import Path
-
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox, QFileDialog
 import PyQt5.uic as uic
 import darkdetect
 from darktheme.widget_template import DarkPalette
+
+
 import os.path
 import sys
 
@@ -33,8 +34,7 @@ class App:
             self.app = QApplication(sys.argv)
         self.win = QMainWindow()
         self.ui = uic.loadUi(resource('res/MainForm.ui'), self.win)
-        self.win.resize(460, 350)
-        self.win.setFixedSize(460, 350)
+        self.win.resize(700, 350)
         self.win.show()
         self.win.setWindowTitle('JDT')
         self.win.setWindowIcon(QIcon(resource('res/code.png')))
@@ -54,6 +54,8 @@ class App:
 
     def process_files(self):
         files_to_decompile = [self.ui.filesList.item(i).text() for i in range(self.ui.filesList.count())]
+        procedure = 0
+        unprocedure = 0
         for file in files_to_decompile:
             filename, ext = os.path.splitext(file)
             print('java -jar ' + str(resource('lib\\procyon.jar')) + f' {file}')
@@ -61,11 +63,19 @@ class App:
                 log = subprocess.getoutput('java -jar ' + str(resource('lib/procyon.jar')) + f' {file}')
                 fs = Path(f'{filename}').stem
                 with open(f'./java/{fs}.java', 'w') as f:
-                    f.write(log)
-                    f.close()
+                    if not log.startswith("!!! ERROR"):
+                        f.write(log)
+                        f.close()
+                        procedure += 1
+                    else:
+                        unprocedure += 1
                 print(file, 'decompiled')
             except:
+                unprocedure += 1
                 print('ERR')
+        QMessageBox.information(None, 'Decompilation Stats', f'{procedure} file(s) decompiled, {unprocedure} skipped'
+                                                             f'\nSaved to "java" directory in one dir with this '
+                                                             f'program executable.')
 
     def files_list_logic_remove(self):
         self.ui.filesList.takeItem(self.ui.filesList.row(self.ui.filesList.currentItem()))
