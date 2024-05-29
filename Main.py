@@ -1,11 +1,9 @@
 import glob
 import subprocess
 from pathlib import Path
-from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox, QFileDialog
-import PyQt5.uic as uic
-import darkdetect
-from darktheme.widget_template import DarkPalette
+from PyQt6.QtGui import QIcon
+from PyQt6.QtWidgets import QApplication, QMainWindow, QMessageBox, QFileDialog
+import PyQt6.uic as uic
 
 
 import os.path
@@ -26,12 +24,7 @@ class App:
     win = None
 
     def __init__(self):
-        if darkdetect.isDark():
-            self.app = QApplication(sys.argv + ['-platform', 'windows:darkmode=1'])
-            self.app.setStyle('Fusion')
-            self.app.setPalette(DarkPalette())
-        else:
-            self.app = QApplication(sys.argv)
+        self.app = QApplication(sys.argv)
         self.win = QMainWindow()
         self.ui = uic.loadUi(resource('res/MainForm.ui'), self.win)
         self.win.resize(700, 350)
@@ -50,7 +43,7 @@ class App:
         folder = glob.glob('java/*')
         for f in folder:
             os.remove(f)
-        sys.exit(self.app.exec_())
+        sys.exit(self.app.exec())
 
     def process_files(self):
         files_to_decompile = [self.ui.filesList.item(i).text() for i in range(self.ui.filesList.count())]
@@ -88,5 +81,5 @@ class App:
 
 
 if __name__ == '__main__':
-    print('JDT made with PyQt5; Python', sys.version)
+    print('JDT made with PyQt6; Python', sys.version)
     App()
